@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.3.1.RELEASE</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>Interprete-1</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Interprete-1</name>
+	<description>Transforma consultas en lenguaje natural escrito a
+		sentencial sql
+	</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+	</properties>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.github.vbmacher</groupId>
+			<artifactId>java-cup</artifactId>
+			<version>11b-20160615</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180813</version>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<plugins>
+
+			<!-- inicio jflex -->
+			<plugin>
+				<groupId>de.jflex</groupId>
+				<artifactId>jflex-maven-plugin</artifactId>
+				<version>1.8.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>src/main/java/com/tesis/util</outputDirectory>
+							<lexDefinitions>
+								<lexDefinition>src/main/java/com/tesis/jflex/A_Lexico.flex
+								</lexDefinition>
+							</lexDefinitions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- fin de jflex -->
+			<!--inicio de cup runtime -->
+			<plugin>
+				<groupId>com.github.vbmacher</groupId>
+				<artifactId>cup-maven-plugin</artifactId>
+
+				<version>11b-20160615</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>src/main/java/</outputDirectory>
+
+							<cupDefinition>src/main/java/com/tesis/cup/A_Sintactico.cup</cupDefinition>
+							<packageName>com.tesis.util</packageName>
+							<symbolsName>Simbolos</symbolsName>
+							<className>Analizador_Sintactico</className>
+
+
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<!-- fin de cup runtime -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

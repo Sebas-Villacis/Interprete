@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html >
+<head>
+<meta charset="UTF-8" />
+
+<title>Interprete</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--  datatables jquery  -->
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/v/bs4/dt-1.10.21/datatables.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.2/semantic.css" />
+<link rel="stylesheet" type="text/css"
+	href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css" />
+
+<!-- bootstrapt CDN -->
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+	integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+	crossorigin="anonymous">
+<!-- jquery CDN -->
+<script src="https://code.jquery.com/jquery-3.5.1.js"
+	integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+	crossorigin="anonymous"></script>
+
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.2/semantic.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.js"></script>
+
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+	integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+	crossorigin="anonymous"></script>
+
+<script type="text/javascript"
+	src="https://cdn.datatables.net/v/bs4/dt-1.10.21/datatables.js"></script>
+
+
+<!-- my stykes of css and js -->
+<link type="text/css" href="css/styles2.css" rel="stylesheet" />
+<script src="js/process.js"></script>
+</head>
+<body oncontextmenu="return false;">
+	<div class="ui top attached menu" style="background-color: #ebebeb;">
+		<div class="ui icon item"
+			style="background-color: #2abb9d; color: #fff;">
+			<i class="file text icon" style="font-size: 2em;"></i>
+		</div>
+		<div class="right menu">
+
+			<div id="userSession" class="item author" style="padding: 10px 20px;">
+				<img class="ui avatar image" style="margin-right: 15px;"
+					src="//semantic-ui.com/images/avatar/small/jenny.jpg">
+				
+			</div>
+		</div>
+	</div>
+
+	<div class="ui container">
+		
+		<h1 class="page-heading" id="dataBaseName"></h1>
+
+		<div class="ui equal width stackable grid">
+
+			<div class="row">
+				<div class="sixteen wide column">
+					<h2 class="subpage-heading no-border">Resultados de la consulta</h2>
+					<div class="content">
+						<table id="tabla" class="table table-striped"></table>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="six wide column">
+					<h2 class="subpage-heading">Lista de Errores Sintácticos</h2>
+					<div class="content">
+						<div class="device-list device-in-error">
+							<h3>En el error</h3>
+							<ul id="errors">
+							</ul>
+						</div>
+
+
+
+						<div class="device-list device-recently">
+							<h3>Tokens Reconocidos</h3>
+							<ul id="tokens">
+
+							</ul>
+
+						</div>
+
+					</div>
+				</div>
+				<div class="ten wide column">
+					<div class="forecasts ui basic segment">
+						<h2 class="subpage-heading">
+							Transformación de la Consulta
+							<div class="alert-message"></div>
+						</h2>
+						<div class="ui grid">
+							<div class="thirteen wide column">
+								<h4>Consulta en lenguaje natural escrito</h4>
+								<div class="forecast">
+									<input type="text" class="form-control" id="sentencia"
+										placeholder="Buscar los Clientes" required>
+								</div>
+								<div class="button-group">
+									<button id="iniciar" class="tiny ui button teal-text">Generar</button>
+								</div>
+
+							</div>
+							<div class="thirteen wide column">
+								<h4>Consulta en sintaxis SQL</h4>
+
+								<div class="forecast">
+
+									<input type="text" class="form-control" id="sql" disabled>
+								</div>
+
+
+							</div>
+						</div>
+					</div>
+
+					<div class="ui basic segment">
+						<h2 class="subpage-heading">Reglas y limitaciones de la sintaxis del intérprete</h2>
+						<div class="content">
+							<ul>
+								<li>Solo se reconoce verbos en infinitivo.</li>
+								<li>Solo se reconoce como adverbio a la palabra donde tanto en mayúsculas como en minúsculas. </li>
+								<li>Acepta a las preposiciones: entre, a, desde, hasta, con, en, de, datos. </li>
+								<li>Se acepta a las proposiciones como: los, las, unos, unas. </li>
+								<li>Se reconoce como sustantivos a las palabras que empiezan con mayúsculas.</li>
+								<li>Se acepta conjunciones como: y, o, e, u, “,”. </li>
+								<li>Se reconoce fecha en el formato “YYY/MM/DD” .</li>
+								<li>Se reconoce como adjetivo a “ordenado”.</li>
+								<li>Se reconoce a los operadores :”=”, ">", "<", "<=", ">=”. </li>
+								<li>De igual manera se reconoce a los paréntesis.</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="ui basic segment">
+						<h2 class="subpage-heading" style="margin-bottom: 0">Consultas Recientes</h2>
+						<div class="content" style="">
+							<table class="ui basic table history" style="border: none;">
+								<tbody id="queryHistory">
+
+
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>

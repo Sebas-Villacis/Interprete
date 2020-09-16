@@ -1,0 +1,362 @@
+/*--------------- 1ra Area: Codigo de Usuario -----------------------*/
+//-------> importaciones, paquetes
+//package com.tesis.util;
+import java_cup.runtime.Symbol;
+import java.util.LinkedList;
+import java.util.HashMap;
+import java.lang.StringBuilder;
+//------> Codigo para el parser,variables, metodos
+parser code
+{:
+    public String resultado="";
+    public static LinkedList<TError> TablaES = new LinkedList<TError>();
+
+    public static HashMap<String, String> TablaSQL  = new HashMap<String, String>() {{
+//Palabras mostradas con Select
+	put("buscar", "SELECT ");
+	put("visualizar", "SELECT ");
+	put("ver", "SELECT ");
+	put("hallar", "SELECT ");
+	put("seleccionar", "SELECT ");	
+	put("mostrar", "SELECT ");
+	put("indicar", "SELECT ");
+	put("señalar", "SELECT ");
+	put("enseñar", "SELECT ");
+	put("visibilizar", "SELECT ");
+	
+	//Palabras mostradas con Update
+    put("actualizar", "UPDATE ");
+	put("reemplazar", "UPDATE ");
+	put("modificar", "UPDATE ");
+	
+	//Palabras mostradas con Delete
+    put("eliminar", "DELETE ");
+	put("descartar", "DELETE ");
+    put("excluir", "DELETE ");
+	put("suprimir", "DELETE ");
+	put("quitar", "DELETE ");
+	
+	// Palabras mostradas con Insert 
+    put("insertar", "INSERT INTO ");
+	put("introducir", "INSERT INTO ");
+	put("incluir", "INSERT INTO ");
+	put("agregar", "INSERT INTO ");
+	
+    put("donde", " WHERE ");
+	put("cual", " WHERE ");
+    put("en", "FROM ");
+    put("de", "FROM ");
+    put("con", "SET ");
+    put("y", " AND ");
+	put("e", "AND ");
+    put("o", "OR ");
+	put("u", "OR ");
+    put("los", "* FROM ");
+	put("las", "* FROM ");
+	put("unos", "* FROM ");
+	put("unas", "* FROM ");
+        put("datos", "VALUES");
+        put("entre", " BETWEEN ");
+        put("ordenado", " ORDER BY");
+
+
+    put(",", ",");
+}};
+  
+    //Metodo al que se llama automaticamente ante algun error sintactico
+    public void syntax_error(Symbol s)
+    {        
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        
+        System.out.println("!!!!!!! Error Sintactico Recuperado !!!!!!!");
+        System.out.println("\t\tLexema: "+lexema);
+        System.out.println("\t\tFila: "+fila);
+        System.out.println("\t\tColumna: "+columna);
+
+        TError datos = new TError(lexema,fila,columna,"Error Sintactico","Caracter no esperado");
+        TablaES.add(datos);
+       
+        
+    }
+
+    //Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    {        
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        
+        System.out.println("!!!!!!! Error Sintactico, Panic Mode !!!!!!! ");
+        System.out.println("\t\tLexema: "+lexema);
+        System.out.println("\t\tFila: "+fila);
+        System.out.println("\t\tColumna: "+columna);
+
+        TError datos = new TError(lexema,fila,columna,"Error Sintactico","Caracter no esperado");
+        TablaES.add(datos);
+     
+    }
+    public static String quote(String s) {
+               if(s.substring(0,1).equals('\'')){
+        return s;
+        }else{ 
+        return new StringBuilder()
+            .append('\'')
+            .append(s)
+            .append('\'')
+            .toString();
+        }
+    }
+     public String printErrors(){
+         StringBuilder str  = new StringBuilder();
+        for(TError item : TablaES ){
+        str.append("!!!!'"+item.tipo+"','"+item.descripcion+"'!!!!\n"+
+                  "\tLexema: "+item.lexema+"\n"+
+                  "\tFila: "+item.linea+"\n"+
+                  "\tColumna: "+item.columna+"\n\n"); 
+        
+        }
+       return str.toString();
+    
+    }
+:}
+
+//------> Codigo para las acciones gramaticales
+action code
+{:
+:}
+
+/*--------------- 2da Area: Declaraciones -----------------------*/
+//------> declaracion de terminales 
+terminal mas,por,div,para,parc,igual,mayor,menor;
+terminal String num,verbo,adverbio,preposicion,proposicion,sustantivo,conjuncion,fecha,adjetivo;
+
+//------> declaracion de no terminales
+non terminal String INICIO,VP,NP,R,I,Z,W;
+
+//----> precedencia de menor a mayor 
+precedence left mas;
+precedence left por, div;
+
+start with INICIO;
+
+/*--------------- 3ra Area: Reglas Semanticas -----------------------*/
+
+INICIO::= VP:a NP:c {: resultado=a+" "+c; :};
+
+VP::= verbo:a R:r {: RESULT=TablaSQL.get(a.toLowerCase())+r;
+                        :}
+     |verbo:a {:  if(RESULT==null){
+                         RESULT=TablaSQL.get(a.toLowerCase());
+                                }else{
+                                RESULT+=TablaSQL.get(a.toLowerCase());
+}
+                            
+                        :};
+
+
+NP::= preposicion:pr R:r{: if(RESULT==null){
+                                     RESULT=TablaSQL.get(pr.toLowerCase())+r;
+                                                         
+                                       }
+                                      else{ 
+                                        RESULT+=TablaSQL.get(pr.toLowerCase())+r;
+                                         } :}
+
+     |proposicion:pr R:r {: if(RESULT==null){
+                                      RESULT=TablaSQL.get(pr.toLowerCase())+r;
+                                                          
+                                       }
+                                      else{ RESULT+=TablaSQL.get(pr.toLowerCase())+r;
+                                         } :}
+
+     |preposicion:pr R:r NP:np  {: if(RESULT==null){
+                                        RESULT=TablaSQL.get(pr.toLowerCase())+r+np;
+                                                           
+                                       }
+                                      else{ RESULT+=TablaSQL.get(pr.toLowerCase())+r+np;
+                                         } :}
+    | proposicion: pr R:r NP:np {: if(RESULT==null){
+                                        RESULT=TablaSQL.get(pr.toLowerCase())+r+np;
+                                                           
+                                       }
+                                      else{ RESULT+=TablaSQL.get(pr.toLowerCase())+r+np;
+                                         } :}
+
+     |adverbio:ad I:i {: if(RESULT==null){
+                                      RESULT=TablaSQL.get(ad.toLowerCase())+i;
+                                                        
+                                       }
+                                      else{ RESULT+=TablaSQL.get(ad.toLowerCase())+i;
+                                         } :}
+     |adjetivo:adj I:i {: if(RESULT==null){
+                                      RESULT=TablaSQL.get(adj.toLowerCase())+i;
+                                                        
+                                       }
+                                      else{ RESULT+=TablaSQL.get(adj.toLowerCase())+i;
+                                         } :}
+     |preposicion:pr para:pa Z:z parc: pc {: if(RESULT==null){
+                                      RESULT=TablaSQL.get(pr.toLowerCase())+pa+z+pc;
+                                                        
+                                       }
+                                      else{ RESULT+=TablaSQL.get(pr.toLowerCase())+pa+z+pc;
+                                         } :}
+        |adverbio:ad I:i W:w  {: if(RESULT==null){
+                                      RESULT=TablaSQL.get(ad.toLowerCase())+i+ " "+ w;
+                                                        
+                                       }
+                                      else{ RESULT+=TablaSQL.get(ad.toLowerCase())+i+ " "+ w;
+                                         } :}
+        |adverbio:ad I:i preposicion:pr Z:z {: if(RESULT==null){
+                                      RESULT=TablaSQL.get(ad.toLowerCase())+i+ " "+TablaSQL.get(pr.toLowerCase())+" "+z;
+                                                        
+                                       }
+                                      else{ RESULT+=TablaSQL.get(ad.toLowerCase())+i+ " "+TablaSQL.get(pr.toLowerCase())+" "+z;
+                                         } :}
+        |adverbio:ad I:i adjetivo:adj R:r {: if(RESULT==null){
+                                             RESULT=TablaSQL.get(ad.toLowerCase())+i+ " "+TablaSQL.get(adj.toLowerCase())+" "+r;
+
+                                              }
+                                             else{ RESULT+=TablaSQL.get(ad.toLowerCase())+i+ " "+TablaSQL.get(adj.toLowerCase())+" "+r;
+                                                } :}
+;
+                                        
+
+R ::=  I:i conjuncion:co R:r {: if(RESULT==null){
+                                      
+                                        RESULT=i+TablaSQL.get(co.toLowerCase())+r;
+                                                           
+                                       }
+                                      else{ RESULT+=i+TablaSQL.get(co.toLowerCase())+r;
+                                         } :}
+
+     |sustantivo:s {: if(RESULT==null){RESULT=s;
+                                }else{RESULT+=s;} :}
+
+     
+     |sustantivo:s igual:ig sustantivo:su {: if(RESULT==null){
+                                      
+                                        RESULT=s+ig+" "+quote(su);
+                                                           
+                                       }
+                                      else{ RESULT+=s+ig+" "+quote(su);
+                                         } :}
+
+      ;
+
+I ::= sustantivo:su {: if(RESULT==null){RESULT=su;}
+     
+                         else{RESULT+=su;} :}
+     | fecha:fe {:if(RESULT==null){RESULT=fe;}
+     
+                         else{RESULT+=fe;} :}
+     | num:n {: if(RESULT==null){RESULT=n;}
+                         else{RESULT+=n;} :}
+     |sustantivo:su mayor:my I:i {: if(RESULT==null){RESULT=su+" "+my+" "+i;}
+                         else{RESULT+=su+" "+my+" "+i;} :}
+     |sustantivo:su menor:mn I:i {: if(RESULT==null){RESULT=su+" "+mn+" "+i;}
+                         else{RESULT+=su+" "+mn+" "+i;} :}
+     |sustantivo:su mayor:my igual:ig I:i {: if(RESULT==null){RESULT=su+" "+my+ig+" "+i;}
+                         else{RESULT+=su+" "+my+ig+" "+i;} :}
+     |sustantivo:su menor:mn igual:ig I:i {: if(RESULT==null){RESULT=su+" "+mn+ig+" "+i;}
+                         else{RESULT+=su+" "+mn+ig+" "+i;} :}
+     |sustantivo:su igual:ig I:i {: if(RESULT==null){RESULT=su+" "+ig+" "+quote(i);}
+                         else{RESULT+=su+" "+ig+" "+quote(i);} :};
+                         
+Z ::= sustantivo:su conjuncion:co Z:z {: if(RESULT==null){
+                                      
+                                        RESULT=quote(su)+TablaSQL.get(co.toLowerCase())+z;
+                                                           
+                                       }
+                                      else{ RESULT+=quote(su)+TablaSQL.get(co.toLowerCase())+z;
+                                         } :}
+    | sustantivo:su {: if(RESULT==null){
+                                      
+                                        RESULT=quote(su);
+                                                           
+                                       }
+                                      else{ RESULT+=quote(su);
+                                         } :}
+    | num:n conjuncion:co Z:z {: if(RESULT==null){
+                                      
+                                        RESULT=n+TablaSQL.get(co.toLowerCase())+z;
+                                                           
+                                       }
+                                      else{ RESULT+=n+TablaSQL.get(co.toLowerCase())+z;
+                                         } :}
+    | num: n {: if(RESULT==null){
+                                      
+                                        RESULT=n;
+                                                           
+                                       }
+                                      else{ RESULT+=n;
+                                         } :}
+| fecha:fe conjuncion:co Z:z {: if(RESULT==null){
+                                      
+                                        RESULT=quote(fe)+TablaSQL.get(co.toLowerCase())+z;
+                                                           
+                                       }
+                                      else{ RESULT+=quote(fe)+TablaSQL.get(co.toLowerCase())+z;
+                                         } :}
+    | fecha:fe {: if(RESULT==null){
+                                      
+                                        RESULT=quote(fe);
+                                                           
+                                       }
+                                      else{ RESULT+=quote(fe);
+                                         } :}
+;
+                         
+W ::=   conjuncion:co W:w {: if(RESULT==null){
+                                      
+                                        RESULT= " "+TablaSQL.get(co.toLowerCase())+w;
+                                                            
+                                       }
+                                      else{ RESULT+= " "+ TablaSQL.get(co.toLowerCase())+w;
+                                         } :}
+      |sustantivo:s igual:ig sustantivo:su {: if(RESULT==null){
+                                      
+                                        RESULT=s+ig+" "+quote(su);
+                                                           
+                                       }
+                                      else{ RESULT+=s+ig+" "+quote(su);
+                                         } :}
+|sustantivo:s igual:ig num:nu {: if(RESULT==null){
+                                      
+                                        RESULT=s+ig+" "+quote(nu);
+                                                           
+                                       }
+                                      else{ RESULT+=s+ig+" "+quote(nu);
+                                         } :}
+|sustantivo:s mayor:ma num:nu {: if(RESULT==null){
+                                      
+                                        RESULT=s+" "+ma+" "+quote(nu);
+                                                           
+                                       }
+                                      else{ RESULT+=s+" "+ma+" "+quote(nu);
+                                         } :}
+|sustantivo:s menor:me num:nu {: if(RESULT==null){
+                                      
+                                        RESULT=s+" "+me+" "+quote(nu);
+                                                           
+                                       }
+                                      else{ RESULT+=s+" "+me+" "+quote(nu);
+                                         } :}
+|sustantivo:s mayor:ma igual: ig num:nu {: if(RESULT==null){
+                                      
+                                        RESULT=s+" "+ma+ig+" "+quote(nu);
+                                                           
+                                       }
+                                      else{ RESULT+=s+" "+ma+ig+" "+quote(nu);
+                                         } :}
+|sustantivo:s menor:me igual: ig num:nu {: if(RESULT==null){
+                                      
+                                        RESULT=s+" "+me+ig+" "+quote(nu);
+                                                           
+                                       }
+                                      else{ RESULT+=s+" "+me+ig+" "+quote(nu);
+                                         } :}
+;
+
+
